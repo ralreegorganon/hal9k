@@ -44,6 +44,7 @@ func main() {
 		log.Println(err)
 	}
 	log.Println(res.StatusCode)
+
 	/*
 		s := &startMatchRequestMessage{
 			Match: "68267d65-6f63-4c18-8afa-dce5c91e0e73",
@@ -58,6 +59,7 @@ func main() {
 				}
 				log.Println(res.StatusCode)
 	*/
+
 	ch := make(chan bool)
 	<-ch
 }
@@ -79,6 +81,7 @@ func createRouter() (*mux.Router, error) {
 		},
 		"POST": {
 			"/status": Status,
+			"/think":  Think,
 		},
 	}
 
@@ -130,6 +133,11 @@ func httpError(w http.ResponseWriter, err error) {
 }
 
 func Status(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	w.WriteHeader(http.StatusOK)
+	return nil
+}
+
+func Think(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 	w.WriteHeader(http.StatusOK)
 	return nil
 }
