@@ -138,6 +138,56 @@ func Status(w http.ResponseWriter, r *http.Request, vars map[string]string) erro
 }
 
 func Think(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
-	w.WriteHeader(http.StatusOK)
+	decoder := json.NewDecoder(r.Body)
+	state := &RobotState{}
+
+	err := decoder.Decode(state)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	// THINK HERE
+	log.Printf("%+v\n", state)
+
+	commands := &RobotCommands{
+		Turn:       20,
+		TurnGun:    10,
+		TurnRadar:  5,
+		Accelerate: 1,
+		Fire:       1,
+	}
+
+	log.Printf("sending %+v\n", commands)
+
+	err = writeJSON(w, http.StatusOK, commands)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return nil
+}
+
+type RobotState struct {
+	Position     Point   `json:"position"`
+	Heading      float64 `json:"heading"`
+	GunHeading   float64 `json:"gunHeading"`
+	RadarHeading float64 `json:"radarHeading"`
+	Velocity     float64 `json:"velocity"`
+	Heat         float64 `json:"heat"`
+	Health       float64 `json:"health"`
+	Alive        bool    `json:"alive"`
+}
+
+type RobotCommands struct {
+	Turn       float64 `json:"turn"`
+	TurnGun    float64 `json:"turnGun"`
+	TurnRadar  float64 `json:"turnRadar"`
+	Accelerate float64 `json:"accelerate"`
+	Fire       float64 `json:"fire"`
+}
+
+type Point struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
 }
