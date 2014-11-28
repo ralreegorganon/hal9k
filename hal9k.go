@@ -175,7 +175,7 @@ type RobotState struct {
 	RadarHeading float64 `json:"radarHeading"`
 	Velocity     float64 `json:"velocity"`
 	Heat         float64 `json:"heat"`
-	Health       float64 `json:"health"`
+	Energy       float64 `json:"energy"`
 	Alive        bool    `json:"alive"`
 }
 
