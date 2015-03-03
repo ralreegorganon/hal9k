@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -14,6 +16,14 @@ import (
 )
 
 func main() {
+	var dat map[string]interface{}
+	f, err := ioutil.ReadFile("match.json")
+	if err != nil {
+		fmt.Printf("File error: %v\n", err)
+	}
+	json.Unmarshal(f, &dat)
+	match := dat["match"].(string)
+
 	rand.Seed(time.Now().Unix())
 	port := strconv.Itoa(rand.Intn(999) + 9000)
 
@@ -34,7 +44,7 @@ func main() {
 
 	j := &joinMatchRequestMessage{
 		Endpoint: "http://localhost:" + port,
-		Match:    "68267d65-6f63-4c18-8afa-dce5c91e0e73",
+		Match:    match,
 	}
 
 	log.Printf("joining match %+v\n", j)
@@ -42,8 +52,13 @@ func main() {
 	res, err := http.Post("http://localhost:3008/join", "application/json", bytes.NewBuffer(js))
 	if err != nil {
 		log.Println(err)
+		os.Exit(-1)
 	}
-	log.Println(res.StatusCode)
+
+	if res.StatusCode != 200 {
+		log.Println(res.StatusCode)
+		os.Exit(-1)
+	}
 
 	/*
 		s := &startMatchRequestMessage{
@@ -82,6 +97,8 @@ func createRouter() (*mux.Router, error) {
 		"POST": {
 			"/status": Status,
 			"/think":  Think,
+			"/end":    End,
+			"/start":  Start,
 		},
 	}
 
@@ -137,6 +154,17 @@ func Status(w http.ResponseWriter, r *http.Request, vars map[string]string) erro
 	return nil
 }
 
+func Start(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	w.WriteHeader(http.StatusOK)
+	return nil
+}
+
+func End(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	w.WriteHeader(http.StatusOK)
+	os.Exit(0)
+	return nil
+}
+
 func Think(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 	decoder := json.NewDecoder(r.Body)
 	state := &RobotState{}
@@ -151,11 +179,11 @@ func Think(w http.ResponseWriter, r *http.Request, vars map[string]string) error
 	log.Printf("%+v\n", state)
 
 	commands := &RobotCommands{
-		Turn:       20,
-		TurnGun:    10,
-		TurnRadar:  5,
+		Turn:       1,
+		TurnGun:    0,
+		TurnRadar:  0,
 		Accelerate: 1,
-		Fire:       1,
+		Fire:       0.1,
 	}
 
 	log.Printf("sending %+v\n", commands)
