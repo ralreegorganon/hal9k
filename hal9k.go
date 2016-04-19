@@ -69,10 +69,10 @@ type hal9k struct {
 func (r *hal9k) Think(s *cylon.RobotState) *cylon.RobotCommands {
 	commands := &cylon.RobotCommands{
 		Turn:       0,
-		TurnGun:    0,
+		TurnGun:    10,
 		TurnRadar:  1,
 		Accelerate: 0,
-		Fire:       0,
+		Fire:       1,
 	}
 	return commands
 }
